@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Test Management</title>
+  <style>
+    table, th, td { 
+      border: 1px solid black; 
+      border-collapse: collapse; 
+      padding: 8px; 
+    }
+    input { 
+      margin: 5px; 
+    }
+  </style>
+</head>
+<body>
+  <h1>User List</h1>
+  <table id="userTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>NAME</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Data will be populated here -->
+    </tbody>
+  </table>
+
+  <h2>Add New User</h2>
+  <input type="number" id="userId" placeholder="ID">
+  <input type="text" id="userUsers" placeholder="Users">
+  <button onclick="addUser()">Add User</button>
+
+  <script>
+    async function loadUsers() {
+      try {
+        const res = await fetch('/users');
+        const users = await res.json();
+        const tbody = document.querySelector('#userTable tbody');
+        tbody.innerHTML = '';
+        users.forEach(user => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${user.id}</td><td>${user.users}</td>`;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error('Error loading users:', err);
+      }
+    }
+
+    async function addUser() {
+      const id = document.getElementById('userId').value;
+      const usersVal = document.getElementById('userUsers').value;
+      try {
+        await fetch('/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id, users: usersVal })
+        });
+        loadUsers();  // Refresh the table
+      } catch (err) {
+        console.error('Error adding user:', err);
+      }
+    }
+
+    window.onload = loadUsers;
+  </script>
+</body>
+</html>
