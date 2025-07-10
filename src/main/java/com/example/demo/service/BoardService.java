@@ -1,10 +1,13 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.BoardPatchDto;
 import com.example.demo.dto.BoardPostDto;
 import com.example.demo.dto.BoardResponseDto;
 import com.example.demo.entity.Board;
 import com.example.demo.repository.BoardRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -53,10 +56,24 @@ public class BoardService {
         }
     }
     
-    //GET
+    //GET1
     public BoardResponseDto findByBoardId(Long boardId) {
-
         Board board = findBoardId(boardId);
         return BoardResponseDto.findFromBoard(board);
+    }
+
+    //GET2
+    public Page<BoardResponseDto> findAllBoards(Pageable pageable) {
+        Page<Board> boards = boardRepository.findAll(pageable);
+        return boards.map(BoardResponseDto::findFromBoard);
+    }
+
+    //PATCH
+    public Long updateBoard(BoardPatchDto boardPatchDto, Long boardId) {
+        Board board = findBoardId(boardId);
+        board.setTitle(boardPatchDto.getTitle());
+        board.setContentt(boardPatchDto.getContentt());
+
+        return boardRepository.save(board).getBoardId();
     }
 }
