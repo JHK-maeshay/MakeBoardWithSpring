@@ -2,44 +2,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Welcome</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 50px;
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        input {
-            padding: 8px;
-            margin: 5px;
-        }
-        button {
-            padding: 8px 12px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login Page</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Vue.js -->
+  <script src="https://unpkg.com/vue@3"></script>
+
+  <!-- Toastify -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
-<body>
-    <h1>Hello, Spring Boot!</h1>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
-    <h2>Login</h2>
-    <form onsubmit="goToFrontPage(event)">
-        <label for="username">Username:</label><br>
-        <input type="text" id="username" placeholder="Enter your username"><br>
+  <div id="app" class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
+    <h1 class="text-2xl font-bold text-center mb-6">🔐 로그인</h1>
 
-        <label for="password">Password:</label><br>
-        <input type="password" id="password" placeholder="Enter your password"><br>
+    <form @submit.prevent="login">
+      <div class="mb-4">
+        <label for="username" class="block text-gray-700 font-semibold mb-2">Username</label>
+        <input type="text" id="username" v-model="username" placeholder="Enter your username"
+          class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      </div>
 
-        <button type="submit">Login</button>
+      <div class="mb-6">
+        <label for="password" class="block text-gray-700 font-semibold mb-2">Password</label>
+        <input type="password" id="password" v-model="password" placeholder="Enter your password"
+          class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      </div>
+
+      <button type="submit"
+        class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
+        로그인
+      </button>
     </form>
+  </div>
 
-    <script>
-        function goToFrontPage(event) {
-            event.preventDefault(); // 폼 제출 막기
-            location.href = 'front.html'; // front.html로 이동
+  <script>
+    const app = Vue.createApp({
+      data() {
+        return {
+          username: '',
+          password: ''
+        };
+      },
+      methods: {
+        login() {
+          // 실제 로그인 검증은 생략 (더미)
+          if (this.username && this.password) {
+            showToast("✅ 로그인 성공!", "#10B981"); // 초록색
+            setTimeout(() => {
+              window.location.href = 'front.html';
+            }, 1000);
+          } else {
+            showToast("⚠️ 아이디와 비밀번호를 입력해주세요.", "#F97316"); // 주황색
+          }
         }
-    </script>
+      }
+    });
+
+    function showToast(msg, color) {
+      Toastify({
+        text: msg,
+        duration: 3000,
+        gravity: "top",
+        position: "center",
+        backgroundColor: color,
+        close: true
+      }).showToast();
+    }
+
+    app.mount('#app');
+  </script>
+
 </body>
 </html>

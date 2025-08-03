@@ -1,68 +1,111 @@
+<!-- src/main/resources/static/front.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Test Management</title>
-  <style>
-    table, th, td { 
-      border: 1px solid black; 
-      border-collapse: collapse; 
-      padding: 8px; 
-    }
-    input { 
-      margin: 5px; 
-    }
-  </style>
-</head>
-<body>
-  <h1>User List</h1>
-  <table id="userTable">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>NAME</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Data will be populated here -->
-    </tbody>
-  </table>
 
-  <h2>Add New User</h2>
-  <input type="number" id="userId" placeholder="ID">
-  <input type="text" id="userUsers" placeholder="Users">
-  <button onclick="addUser()">Add User</button>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Toastify -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-10">
+
+  <div class="w-full max-w-2xl bg-white p-8 rounded shadow">
+    <h1 class="text-2xl font-bold mb-6 text-center">👥 User List</h1>
+
+    <table class="w-full table-auto border border-gray-300 mb-8">
+      <thead>
+        <tr class="bg-gray-200 text-left">
+          <th class="border px-4 py-2">ID</th>
+          <th class="border px-4 py-2">NAME</th>
+        </tr>
+      </thead>
+      <tbody id="userTableBody">
+        <!-- 사용자 리스트 렌더링 -->
+      </tbody>
+    </table>
+
+    <h2 class="text-xl font-semibold mb-4">➕ Add/Modify New User</h2>
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <input type="number" id="userId" placeholder="ID"
+             class="border px-3 py-2 rounded w-full sm:w-1/4" />
+      <input type="text" id="userUsers" placeholder="Users"
+             class="border px-3 py-2 rounded w-full sm:w-1/2" />
+      <button onclick="addUser()"
+              class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded">
+        Add User
+      </button>
+    </div>
+  </div>
 
   <script>
     async function loadUsers() {
       try {
         const res = await fetch('/users');
         const users = await res.json();
-        const tbody = document.querySelector('#userTable tbody');
+        const tbody = document.getElementById('userTableBody');
         tbody.innerHTML = '';
         users.forEach(user => {
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${user.id}</td><td>${user.users}</td>`;
+          tr.innerHTML = `
+            <td class="border px-4 py-2">${user.id}</td>
+            <td class="border px-4 py-2">${user.users}</td>
+          `;
           tbody.appendChild(tr);
         });
       } catch (err) {
-        console.error('Error loading users:', err);
+        showToast("❌ 사용자 목록 불러오기 실패", "#EF4444");
+        console.error(err);
       }
     }
 
     async function addUser() {
-      const id = document.getElementById('userId').value;
-      const usersVal = document.getElementById('userUsers').value;
-      try {
-        await fetch('/users', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: id, users: usersVal })
-        });
-        loadUsers();  // Refresh the table
-      } catch (err) {
-        console.error('Error adding user:', err);
-      }
+    	  const id = document.getElementById('userId').value.trim();
+    	  const usersVal = document.getElementById('userUsers').value.trim();
+
+    	  if (!id || !usersVal) {
+    	    showToast("⚠️ ID와 사용자 이름을 입력하세요", "#F59E0B");
+    	    return;
+    	  }
+
+    	  try {
+    	    const res = await fetch('/users', {
+    	      method: 'POST',
+    	      headers: { 'Content-Type': 'application/json' },
+    	      body: JSON.stringify({ id: id, users: usersVal })
+    	    });
+
+    	    if (res.status === 201) {
+    	      showToast("✅ 사용자 추가 성공", "#10B981");
+    	    } else if (res.status === 200) {
+    	      showToast("🔁 사용자 수정 완료", "#3B82F6");
+    	    } else {
+    	      const msg = await res.text();
+    	      showToast(`❌ 실패: ${msg}`, "#EF4444");
+    	    }
+
+    	    loadUsers(); // 성공 시 테이블 갱신
+
+    	  } catch (err) {
+    	    showToast("❌ 서버 오류", "#EF4444");
+    	    console.error(err);
+    	  }
+    	}
+
+    function showToast(message, color = "#EF4444") {
+      Toastify({
+        text: message,
+        duration: 3000,
+        gravity: "top",
+        position: "center",
+        backgroundColor: color,
+        close: true
+      }).showToast();
     }
 
     window.onload = loadUsers;
